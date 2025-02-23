@@ -55,18 +55,16 @@ class Sio2jailExecutor(BaseExecutor):
         result = ExecutionResult()
         with open(result_file_path, "r") as result_file:
             lines = result_file.readlines()
-
+            output = "\t" + "\t".join(lines)
         try:
-            result.stderr = lines[:-2]
             status, code, time_ms, _, memory_kb, _ = lines[-2].strip().split()
+            status, code, time_ms, _, memory_kb, _, _ = lines[-2].strip().split()
             message = lines[-1].strip()
             result.Time = int(time_ms)
             result.Memory = int(memory_kb)
-        except:
-            output = "".join(lines)
-            util.exit_with_error("Could not parse sio2jail output:"
-                f"\n---\n{output}"
-                f"\n---\n{traceback.format_exc()}")
+        except Exception as e:
+            raise Exception(f"Could not parse sio2jail output:\n{output}") from e
+
 
         # ignoring `status` is weird, but sio2 does it this way
         if message == 'ok':
